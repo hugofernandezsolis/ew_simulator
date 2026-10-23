@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Instalar herramientas
         run: sudo apt-get update && sudo apt-get install -y ninja-build clang-18 clang-format-18 clang-tidy-18
