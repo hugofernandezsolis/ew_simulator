@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+  pull_request:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+
+# Un push nuevo a la misma rama cancela la ejecución anterior
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Mínimo privilegio: solo lectura del repositorio
+permissions:
+  contents: read
+
+env:
+  # CMake lee esta variable y usa ccache como lanzador del compilador
+  CMAKE_CXX_COMPILER_LAUNCHER: ccache
+
+jobs:
+  build-test:
+    name: ${{ matrix.compiler.name }} / ${{ matrix.build_type }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+          - { name: gcc-13,   cxx: g++-13,     package: g++-13 }
+          - { name: gcc-14,   cxx: g++-14,     package: g++-14 }
+          - { name: clang-18, cxx: clang++-18, package: clang-18 }
+        build_type: [Debug, Release, RelWithDebInfo]
+    env:
+      CXX: ${{ matrix.compiler.cxx }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar toolchain
+        run: sudo apt-get update && sudo apt-get install -y ninja-build ${{ matrix.compiler.package }}
+
+      - name: Caché de ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.compiler.name }}-${{ matrix.build_type }}
+
+      - name: Configurar, compilar y probar
+        run: cmake --workflow --preset ci-${{ matrix.build_type }}

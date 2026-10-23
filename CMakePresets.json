@@ -1,0 +1,169 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/.build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "Debug",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PROJ_ENABLE_SANITIZERS": "ON",
+        "PROJ_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
+      "name": "Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "RelWithDebInfo",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "ci",
+      "hidden": true,
+      "cacheVariables": {
+        "PROJ_WARNINGS_AS_ERRORS": "ON"
+      }
+    },
+    {
+      "name": "ci-Debug",
+      "inherits": ["Debug", "ci"]
+    },
+    {
+      "name": "ci-Release",
+      "inherits": ["Release", "ci"]
+    },
+    {
+      "name": "ci-RelWithDebInfo",
+      "inherits": ["RelWithDebInfo", "ci"]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug"
+    },
+    {
+      "name": "Release",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "RelWithDebInfo",
+      "configurePreset": "RelWithDebInfo"
+    },
+    {
+      "name": "ci-Debug",
+      "configurePreset": "ci-Debug"
+    },
+    {
+      "name": "ci-Release",
+      "configurePreset": "ci-Release"
+    },
+    {
+      "name": "ci-RelWithDebInfo",
+      "configurePreset": "ci-RelWithDebInfo"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "Debug",
+      "inherits": "test-base",
+      "configurePreset": "Debug"
+    },
+    {
+      "name": "Release",
+      "inherits": "test-base",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "RelWithDebInfo",
+      "inherits": "test-base",
+      "configurePreset": "RelWithDebInfo"
+    },
+    {
+      "name": "ci-Debug",
+      "inherits": "test-base",
+      "configurePreset": "ci-Debug"
+    },
+    {
+      "name": "ci-Release",
+      "inherits": "test-base",
+      "configurePreset": "ci-Release"
+    },
+    {
+      "name": "ci-RelWithDebInfo",
+      "inherits": "test-base",
+      "configurePreset": "ci-RelWithDebInfo"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "package-base",
+      "hidden": true,
+      "packageDirectory": "${sourceDir}/dist"
+    },
+    {
+      "name": "Release",
+      "inherits": "package-base",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "ci-Release",
+      "inherits": "package-base",
+      "configurePreset": "ci-Release"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-Debug",
+      "steps": [
+        { "type": "configure", "name": "ci-Debug" },
+        { "type": "build", "name": "ci-Debug" },
+        { "type": "test", "name": "ci-Debug" }
+      ]
+    },
+    {
+      "name": "ci-Release",
+      "steps": [
+        { "type": "configure", "name": "ci-Release" },
+        { "type": "build", "name": "ci-Release" },
+        { "type": "test", "name": "ci-Release" }
+      ]
+    },
+    {
+      "name": "ci-RelWithDebInfo",
+      "steps": [
+        { "type": "configure", "name": "ci-RelWithDebInfo" },
+        { "type": "build", "name": "ci-RelWithDebInfo" },
+        { "type": "test", "name": "ci-RelWithDebInfo" }
+      ]
+    }
+  ]
+}

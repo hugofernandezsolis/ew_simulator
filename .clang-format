@@ -1,0 +1,16 @@
+---
+# Estilo base LLVM ajustado a las convenciones del proyecto:
+# 2 espacios, 120 columnas, `public:` sin sangrar, namespaces sin sangrar y hasta 2 líneas en blanco seguidas.
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+IndentWidth: 2
+ColumnLimit: 120
+AccessModifierOffset: -2
+NamespaceIndentation: None
+MaxEmptyLinesToKeep: 2
+AllowShortFunctionsOnASingleLine: Empty
+PointerAlignment: Left
+SortIncludes: false
+ReflowComments: false
+...

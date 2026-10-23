@@ -1,0 +1,52 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+  pull_request:
+    branches: [main]
+    paths-ignore: ["docs/**", "**.md"]
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CMAKE_CXX_COMPILER_LAUNCHER: ccache
+  CXX: g++-13
+
+jobs:
+  coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar toolchain
+        run: sudo apt-get update && sudo apt-get install -y ninja-build g++-13 gcovr
+
+      - name: Caché de ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: coverage
+
+      - name: Configurar
+        run: cmake --preset ci-Debug
+
+      # The coverage target builds the tests, runs them with ctest and writes the gcovr report.
+      - name: Tests e informe de cobertura
+        run: cmake --build --preset ci-Debug --target coverage
+
+      - name: Subir informe
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: .build/ci-Debug/coverage
+          if-no-files-found: error
+          # .build/ empieza por punto: sin esto, upload-artifact (≥ v4.4) lo trata como oculto y no sube nada
+          include-hidden-files: true

@@ -1,0 +1,12 @@
+---
+# Conjunto conservador: errores probables y rendimiento. Se amplía poco a poco.
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  -bugprone-easily-swappable-parameters
+WarningsAsErrors: "*"
+# Solo las cabeceras de <repo>/src. Anclado al nombre de la carpeta del repo para no incluir dependencias
+# descargadas (.build/_deps/...). Si el repo cambia de nombre, hay que actualizar esta línea.
+HeaderFilterRegex: "/ews/src/"
+...

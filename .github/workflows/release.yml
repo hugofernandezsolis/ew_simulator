@@ -1,0 +1,51 @@
+name: Release
+
+# Se ejecuta al crear un tag de versión, por ejemplo: git tag v1.0.0 && git push origin v1.0.0
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  CXX: g++-13
+  CMAKE_CXX_COMPILER_LAUNCHER: ccache
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Escribir en la release requiere permiso de escritura, solo en este job
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar toolchain
+        run: sudo apt-get update && sudo apt-get install -y ninja-build g++-13
+
+      - name: Caché de ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: release
+
+      - name: Configurar (la versión sale del tag, sin la "v")
+        run: cmake --preset ci-Release -DCPACK_PACKAGE_VERSION="${TAG#v}"
+
+      - name: Compilar
+        run: cmake --build --preset ci-Release
+
+      - name: Tests
+        run: ctest --preset ci-Release
+
+      - name: Empaquetar
+        run: cpack --preset ci-Release
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$TAG" dist/*.deb --title "$TAG" --generate-notes
