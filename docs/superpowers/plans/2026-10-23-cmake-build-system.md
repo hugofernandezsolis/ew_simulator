@@ -121,7 +121,7 @@ Entradas que el spec implica pero que ninguna tarea cubre de forma obvia; cada u
 
 - [ ] **Paso 1: Verificar que falla.** `cmake --preset Debug && cmake --build build/Debug && ctest --test-dir build/Debug`. Esperado: `No tests were found!!!`.
 - [ ] **Paso 2: Implementar `ews_add_component_tests`** y engancharla desde `Components.cmake`.
-- [ ] **Paso 3: Verificar el caso real.** `cmake --preset Debug && cmake --build --preset Debug && ctest --preset Debug`. Esperado: los tests de `ut_Dummy.cpp` aparecen con nombre `Network.Dummy.DummyTest.<caso>.*` y pasan (100% passed). Si el enlazado falla por `main`, ver "Interfaces" (`gtest_main` es lo previsto; el `main` está en `namespace ics`).
+- [ ] **Paso 3: Verificar el caso real.** `cmake --preset Debug && cmake --build --preset Debug && ctest --preset Debug`. Esperado: los tests de `ut_Dummy.cpp` aparecen con nombre `Network.Dummy.DummyTest.<caso>.*` y pasan (100% passed). Si el enlazado falla por `main`, ver "Interfaces" (`gtest_main` es lo previsto; el `main` está en `namespace sigint`).
 - [ ] **Paso 4: Test, `tests/` sin `.cpp`.** En `$FX=…/fx-4a`: crear `src/Network/Vacio/tests/.gitkeep` y `src/Network/Vacio/include/V.h`. Configura y compila sin error; `ctest -N` no lista nada de `Network.Vacio`.
 - [ ] **Paso 5: Test, `EWS_BUILD_TESTS=OFF`.** `cmake -S $FX -B $FX/build-off -G Ninja -DEWS_BUILD_TESTS=OFF` sobre una copia: sin menciones a googletest en la salida y `ctest -N` lista 0 tests.
 - [ ] **Paso 6: Commit** (si hay repo): `feat(cmake): tests por componente con GoogleTest`.

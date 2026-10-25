@@ -103,7 +103,7 @@ Misma función para todas las librerías.
 Un ejecutable de tests **por componente**.
 
 - Si el componente tiene `tests/*.cpp`: target `<Libreria>_<Componente>_tests`. Si no, se omite.
-- Enlaza con la librería completa y con `GTest::gtest_main`. (El `main` de `ut_Dummy.cpp` está dentro de `namespace ics` y por tanto no es el `main` del programa; `gtest_main` lo resuelve.)
+- Enlaza con la librería completa y con `GTest::gtest_main`. (El `main` de `ut_Dummy.cpp` está dentro de `namespace sigint` y por tanto no es el `main` del programa; `gtest_main` lo resuelve.)
 - `gtest_discover_tests` registra cada `TEST` en `ctest`, con un prefijo que identifica librería y componente.
 - Solo se crean con `EWS_BUILD_TESTS=ON` (por defecto ON). Con OFF no se descarga ni compila GoogleTest.
 
