@@ -16,8 +16,9 @@ concurrency:
 permissions:
   contents: read
 
+# Misma versión de LLVM que en local (21), para que los grupos de checks (bugprone-*, misc-*...) sean los mismos.
 env:
-  CXX: clang++-18
+  CXX: clang++-21
 
 jobs:
   lint:
@@ -27,16 +28,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Ubuntu 24.04 no trae LLVM 21: se instala desde el repositorio oficial de LLVM (apt.llvm.org), cuyo script
+      # añade el repositorio e instala clang-21; clang-format-21 y clang-tidy-21 salen del mismo repositorio.
       - name: Instalar herramientas
-        run: sudo apt-get update && sudo apt-get install -y ninja-build clang-18 clang-format-18 clang-tidy-18
+        run: |
+          sudo apt-get update && sudo apt-get install -y ninja-build
+          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+          sudo bash llvm.sh 21
+          sudo apt-get install -y clang-format-21 clang-tidy-21
 
-      # Los paquetes instalan clang-format-18 y clang-tidy-18, no los nombres sin versión: se indican al configurar.
+      # Los paquetes instalan clang-format-21 y clang-tidy-21, no los nombres sin versión: se indican al configurar.
       # El preset Release genera compile_commands.json, que clang-tidy necesita.
       - name: Configurar
         run: >
           cmake --preset Release
-          -DPROJ_CLANG_FORMAT=/usr/bin/clang-format-18
-          -DPROJ_CLANG_TIDY=/usr/bin/clang-tidy-18
+          -DPROJ_CLANG_FORMAT=/usr/bin/clang-format-21
+          -DPROJ_CLANG_TIDY=/usr/bin/clang-tidy-21
 
       - name: Formato (clang-format)
         run: cmake --build --preset Release --target format-check

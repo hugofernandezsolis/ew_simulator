@@ -1,131 +1,66 @@
 /**
- * @file Dummy.cpp
+ * @file ut_Dummy.cpp
  * @author Hugo Fernández Solís (hugofernandezsolis@gmail.com)
- * @date
+ * @date 24/10/2026
  *
- * @brief
+ * @brief Unit tests of Dummy, one test case per function
  *
- * @copyright Copyright (c) 2025
+ * @copyright Copyright (c) 2026
  */
 
 
 // C includes
 // C++ includes
+#include <sstream>
+#include <type_traits>
 // External includes
 #include <gtest/gtest.h>
 // Project includes
 #include <Dummy.h>
 
 
-// Interprocess Communication System
-namespace ics {
+// Dummy
+namespace dummy {
+
+// Compile-time checks of the struct properties
+static_assert(std::is_aggregate_v<Dummy>);
+static_assert(std::is_trivially_copyable_v<Dummy>);
+static_assert(std::is_nothrow_move_constructible_v<Dummy>);
+static_assert(std::is_nothrow_move_assignable_v<Dummy>);
 
 /**
  * @class DummyTest
  *
- * @brief
+ * @brief Fixture that provides a default-initialized Dummy to every test
  */
 class DummyTest : public ::testing::Test {
 protected:
-  Dummy* dummy;
-
-  void SetUp(void) override {
-    dummy = new Dummy();
-  }
-
-  void TearDown(void) override {
-    delete dummy;
-  }
-
-  static void SetUpTestSuite(void) {}
-
-  static void TearDownTestSuite(void) {}
+  Dummy dummy{};
 };
 
-// Test default constructor initializes to false
-TEST_F(DummyTest, DefaultConstructorInitializesToFalse) {
-  EXPECT_FALSE(dummy->get_dummy());
+// Test default initialization is false
+TEST_F(DummyTest, DefaultInitializationIsFalse) {
+  EXPECT_FALSE(dummy.dummy);
 }
 
-// Test setter by const bool&
-TEST_F(DummyTest, SetterByValue) {
-  dummy->set_dummy(true);
-  EXPECT_TRUE(dummy->get_dummy());
-  dummy->set_dummy(false);
-  EXPECT_FALSE(dummy->get_dummy());
+// Test to_string returns "[Dummy: dummy]"
+TEST_F(DummyTest, ToStringReturnsDummy) {
+  EXPECT_EQ(Dummy{.dummy = true}.to_string(), "[Dummy: true]");
+  EXPECT_EQ(Dummy{.dummy = false}.to_string(), "[Dummy: false]");
 }
 
-// Test setter returns reference
-TEST_F(DummyTest, SetterReturnsReference) {
-  bool& ref = dummy->set_dummy();
-  ref = true;
-  EXPECT_TRUE(dummy->get_dummy());
-  ref = false;
-  EXPECT_FALSE(dummy->get_dummy());
-}
-
-// Test to_string returns "0" or "1"
-TEST_F(DummyTest, ToStringReturns0Or1) {
-  dummy->set_dummy(false);
-  EXPECT_EQ(dummy->to_string(), "0");
-  dummy->set_dummy(true);
-  EXPECT_EQ(dummy->to_string(), "1");
-}
-
-// Test copy constructor
-TEST_F(DummyTest, CopyConstructorCopiesValue) {
-  dummy->set_dummy(true);
-  Dummy copy(*dummy);
-  EXPECT_TRUE(copy.get_dummy());
-  // Changing original should not affect copy
-  dummy->set_dummy(false);
-  EXPECT_TRUE(copy.get_dummy());
-}
-
-// Test move constructor
-TEST_F(DummyTest, MoveConstructorMovesValue) {
-  dummy->set_dummy(true);
-  Dummy moved(std::move(*dummy));
-  EXPECT_TRUE(moved.get_dummy());
-  EXPECT_FALSE(dummy->get_dummy());
-}
-
-// Test copy assignment operator
-TEST_F(DummyTest, CopyAssignmentCopiesValue) {
-  dummy->set_dummy(true);
-  Dummy other;
-  other = *dummy;
-  EXPECT_TRUE(other.get_dummy());
-  // Changing original should not affect assigned
-  dummy->set_dummy(false);
-  EXPECT_TRUE(other.get_dummy());
-}
-
-// Test move assignment operator
-TEST_F(DummyTest, MoveAssignmentMovesValue) {
-  dummy->set_dummy(true);
-  Dummy target;
-  target = std::move(*dummy);
-  EXPECT_TRUE(target.get_dummy());
-  EXPECT_FALSE(dummy->get_dummy());
-}
-
-// Test equality and inequality operators
-TEST_F(DummyTest, EqualityAndInequalityOperators) {
-  Dummy a;
-  Dummy b;
-  EXPECT_TRUE(a == b);
-  a.set_dummy(true);
-  EXPECT_FALSE(a == b);
-  EXPECT_TRUE(a != b);
+// Test equality operator
+TEST_F(DummyTest, EqualityOperator) {
+  EXPECT_TRUE((Dummy{.dummy = true}) == (Dummy{.dummy = true}));
+  EXPECT_TRUE((Dummy{.dummy = false}) == (Dummy{.dummy = false}));
+  EXPECT_FALSE((Dummy{.dummy = true}) == (Dummy{.dummy = false}));
 }
 
 // Test ostream operator<<
 TEST_F(DummyTest, OstreamOperatorProducesString) {
-  dummy->set_dummy(true);
-  std::ostringstream oss;
-  oss << *dummy;
-  EXPECT_EQ(oss.str(), "1");
+  std::ostringstream oss{};
+  oss << Dummy{.dummy = true};
+  EXPECT_EQ(oss.str(), "[Dummy: true]");
 }
 
-} // namespace ics
+} // namespace dummy

@@ -1,12 +1,64 @@
 ---
-# Conjunto conservador: errores probables y rendimiento. Se amplía poco a poco.
+# Basado en las C++ Core Guidelines (cppcoreguidelines-*) mas los grupos generales de calidad.
+# Las exclusiones no pueden llevar el comentario en linea (dentro de un bloque `>` el `#` seria texto), asi que cada una
+# se justifica aqui, con su tipo (principles.md): [a] no contradice ninguna regla de las CG; [b] desviacion de las CG,
+# con su fila en la tabla de desviaciones de principles.md.
+#   -bugprone-easily-swappable-parameters   [b I.24] parametros adyacentes del mismo tipo permitidos.
+#   -modernize-use-trailing-return-type     [a] el proyecto usa el tipo de retorno delante (`T f()`); las CG no lo regulan.
+#   -readability-identifier-length          [a] nombres cortos como `i` o `x` en ambitos pequenos (compatible con ES.7).
+#   -readability-uppercase-literal-suffix   [a] se admite el sufijo en minuscula (`1.0f`); las CG no lo regulan.
+#   -readability-redundant-member-init      [a] choca con la regla "siempre `{}`" en los atributos (C.48/ES.23).
+#   readability-braces-around-statements: no se excluye; ShortStatementLines=1 exime solo las sentencias que caben en la
+#                                             misma linea que su `if`/`for`/`while` (las que permite clang-format); a
+#                                             partir de dos lineas las llaves son obligatorias.
+#   misc-non-private-member-variables-in-classes: no se excluye; IgnoreClassesWithAllMemberVariablesBeingPublic=true
+#                                             porque un struct sin invariante tiene todos los atributos publicos
+#                                             (C.2/C.8); la visibilidad mixta sigue marcandose.
 Checks: >
   -*,
   bugprone-*,
+  cppcoreguidelines-*,
+  misc-*,
+  modernize-*,
   performance-*,
-  -bugprone-easily-swappable-parameters
+  readability-*,
+  google-explicit-constructor,
+  google-global-names-in-headers,
+  hicpp-exception-baseclass,
+  -bugprone-easily-swappable-parameters,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-length,
+  -readability-uppercase-literal-suffix,
+  -readability-redundant-member-init
+CheckOptions:
+  readability-braces-around-statements.ShortStatementLines: 1
+  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
+  cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
+  readability-identifier-naming.ClassCase: CamelCase
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.EnumCase: CamelCase
+  readability-identifier-naming.EnumConstantCase: CamelCase
+  readability-identifier-naming.TypeAliasCase: CamelCase
+  readability-identifier-naming.TypedefCase: CamelCase
+  readability-identifier-naming.ConceptCase: CamelCase
+  readability-identifier-naming.TemplateParameterCase: CamelCase
+  readability-identifier-naming.NamespaceCase: lower_case
+  readability-identifier-naming.FunctionCase: lower_case
+  readability-identifier-naming.MethodCase: lower_case
+  # Accesores get_/set_ + nombre del atributo tal cual (get_azimuthDeg): no son lower_case.
+  readability-identifier-naming.MethodIgnoredRegexp: '^(get|set)_[a-z][a-zA-Z0-9]*$'
+  readability-identifier-naming.PrivateMemberCase: camelBack
+  readability-identifier-naming.PublicMemberCase: camelBack
+  readability-identifier-naming.ParameterCase: camelBack
+  readability-identifier-naming.LocalVariableCase: camelBack
+  readability-identifier-naming.VariableCase: camelBack
+  readability-identifier-naming.ConstexprVariableCase: camelBack
+  readability-identifier-naming.GlobalConstantCase: camelBack
+  readability-identifier-naming.PrivateMemberSuffix: '_'
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
 WarningsAsErrors: "*"
 # Solo las cabeceras de <repo>/src. Anclado al nombre de la carpeta del repo para no incluir dependencias
-# descargadas (.build/_deps/...). Si el repo cambia de nombre, hay que actualizar esta línea.
-HeaderFilterRegex: "/ews/src/"
+# descargadas (.build/_deps/...). La carpeta debe llamarse como el repo (ew_simulator), que es el nombre que usa
+# actions/checkout en CI; si no coincide, los avisos de los .h se descartan sin dar error.
+HeaderFilterRegex: "/ew_simulator/src/"
 ...

@@ -134,25 +134,25 @@ por lo que cada uno se puede testear aislado con entradas construidas a mano.
 | Componente | Responsabilidad | Depende de |
 | --- | --- | --- |
 | `Time` (unidades) | Alias de tiempo y conversiones. | — |
-| `Position` / geometría | Vector ENU en metros; funciones `distanceM` y `directionFromTo` (`AngleOfArrival`) entre dos puntos. | `AngleOfArrival` |
-| Propagación (funciones) | `propagationDelay`, `freeSpacePathLossDb`, `wrapOffsetDeg`: física reutilizable también por el procesado (estimación de distancia por amplitud, TDOA, agrupación por AoA). | `Time` |
+| `Position` / geometría | Vector ENU en metros; funciones `distance_m` y `direction_from_to` (`AngleOfArrival`) entre dos puntos. | `AngleOfArrival` |
+| Propagación (funciones) | `propagation_delay`, `free_space_path_loss_db`, `wrap_offset_deg`: física reutilizable también por el procesado (estimación de distancia por amplitud, TDOA, agrupación por AoA). | `Time` |
 | `PriGenerator` | Interfaz: siguiente PRI. Implementaciones `Fixed`, `Stagger`, `Sliding`, `DwellSwitch`. | — |
 | `RfGenerator` | Interfaz: siguiente frecuencia. Implementaciones `Fixed`, `List`. | — |
 | `PwGenerator` | Interfaz: siguiente ancho de pulso. Implementación `Fixed`. | — |
 | `ScanSpec` | Parte intrínseca del scan de un modo: tipo, periodo, elevación, anchura del sector. | — |
 | `ScanPattern` | Interfaz: dirección del haz en un instante relativo al inicio del segmento. Implementaciones `Fixed`, `Circular`, `Sector`. | — |
-| `AntennaPattern` | Interfaz: `gainDbi(offsetAz, offsetEl)`. Implementación `GaussianAntennaPattern`. | — |
+| `AntennaPattern` | Interfaz: `gain_dbi(offsetAz, offsetEl)`. Implementación `GaussianAntennaPattern`. | — |
 | `EmitterMode` | Prototipo del catálogo: generadores de PRI, RF y PW, `ScanSpec`, antena, potencia de pico y modulación intrapulso. | generadores |
 | `EmitterType`, `Catalog` | Librería de emisores: tipos con sus modos. | `EmitterMode` |
 | `Segment` | Tramo del calendario: modo (o silencio), duración y el `ScanPattern` ya orientado por la misión. | `EmitterMode`, `ScanPattern` |
 | `Emitter` | Instancia: id, posición, calendario de segmentos y estado del segmento activo. Produce `EmittedPulse`. | `Segment` |
-| `PropagationChannel` | De `EmittedPulse` a `IncidentPulse`: instante de llegada, dirección de llegada y potencia isotrópica en el receptor. | geometría, propagación, `AntennaPattern` |
+| `PropagationChannel` | Función libre `propagate`, sin estado: de `EmittedPulse` a `IncidentPulse`: instante de llegada, dirección de llegada y potencia isotrópica en el receptor. | geometría, propagación, `AntennaPattern` |
 | `Receiver` | Aplica su ganancia y sensibilidad, mide el AoA y genera el registro. | `PulseRecordWriter` |
 | `PulseRecordWriter` | Interfaz: escribe un registro (PDW + verdad). Implementación `CsvPulseRecordWriter` sobre `std::ostream&`. | — |
 | `EventScheduler` | Cola de prioridad de eventos. No sabe nada de radares. | — |
 | `Simulation` | Recibe una `Mission` ya construida, programa los eventos iniciales y ejecuta hasta vaciar la cola. | todo lo anterior |
-| `MissionRunner` | `runMission(Mission, std::ostream&)`: monta el escritor CSV y la `Simulation` y la ejecuta. | `Simulation`, escritor |
-| Loaders (`Config`) | `parseCatalog`/`loadCatalog`, `parseMission`/`loadMission`: leen JSON, convierten a SI, validan. **Únicos** que conocen nlohmann/json. | todo el dominio |
+| `MissionRunner` | `run_mission(Mission, std::ostream&)`: monta el escritor CSV y la `Simulation` y la ejecuta. | `Simulation`, escritor |
+| Loaders (`Config`) | `parse_catalog`/`load_catalog`, `parse_mission`/`load_mission`: leen JSON, convierten a SI, validan. **Únicos** que conocen nlohmann/json. | todo el dominio |
 
 ### Decisiones de fondo
 
@@ -189,14 +189,15 @@ por lo que cada uno se puede testear aislado con entradas construidas a mano.
 
 ### Ubicación
 
-Las clases que definen una señal, una parte de ella o su tratamiento van en el namespace `sigint` (librería
-`src/SigInt/`); las del simulador, en `sim` (librería `src/Simulator/`). `SigInt` no depende de nada y `Simulator`
-depende de `SigInt`. Todas las clases siguen `.claude/rules/how_to_write_a_class.md` completo; las excepciones están
-listadas en el plan.
+El namespace es la librería en minúsculas (`headers.md`). Las clases que definen una señal, una parte de ella o su
+tratamiento van en el namespace `sigint` (librería `src/SigInt/`); las del simulador, en `simulator` (librería
+`src/Simulator/`); lo transversal sin dominio (`check_contract`), en `core` (librería `src/Core/`). `Core` no depende
+de nada, `SigInt` depende de `Core` y `Simulator` de `SigInt` y `Core`. Todo el código sigue las reglas de `.claude/rules/cpp/`; la clasificación de cada tipo como `struct`
+o `class` y las excepciones están en la decisión 2 del plan.
 
 - `src/SigInt/Units/`: `Time` y sus conversiones (sin dependencias, para que no haya ciclos entre componentes).
 - `src/SigInt/PulseDescriptors/` (existente): `PulseDescriptorWords`, `AngleOfArrival`, `IntrapulseModulation`.
-- `src/SigInt/Geometry/`: `Position`, `distanceM`, `directionFromTo` y las funciones de propagación.
+- `src/SigInt/Geometry/`: `Position`, `distance_m`, `direction_from_to` y las funciones de propagación.
 - `src/SigInt/Emission/`: generadores de PRI, RF y PW, `ScanSpec`, scans, antena, `EmitterMode`, `EmittedPulse`,
   `IncidentPulse`.
 - `src/SigInt/Library/`: `EmitterType`, `Catalog`.
@@ -210,7 +211,7 @@ listadas en el plan.
 
 ### Paso 0 — Arranque
 
-`main` carga la misión (que carga antes el catálogo), abre el fichero de salida y llama a `runMission`. Al ejecutarse,
+`main` carga la misión (que carga antes el catálogo), abre el fichero de salida y llama a `run_mission`. Al ejecutarse,
 `Simulation` pide a cada emisor su primer pulso y programa un evento **Emit** con ese pulso en su instante.
 
 ### Paso 1 — Evento Emit (instante t_e)
@@ -520,7 +521,7 @@ y el ancho de pulso verdaderos coinciden hoy con los medidos; cuando haya ruido 
 | Escritor CSV | cabecera; formato de una fila; azimut que redondea a 360; cero negativo |
 
 Comparaciones: los tiempos con `EXPECT_EQ` (enteros exactos). En los tests de accesores, copia y movimiento,
-`EXPECT_FLOAT_EQ` / `EXPECT_DOUBLE_EQ` (regla R12 de `how_to_write_a_class.md`). En los cálculos físicos (ángulos,
+`EXPECT_FLOAT_EQ` / `EXPECT_DOUBLE_EQ` (`.claude/rules/cpp/tests.md`). En los cálculos físicos (ángulos,
 ganancias, potencias), `EXPECT_NEAR` con tolerancia explícita.
 
 ### Integración (golden file)

@@ -35,14 +35,16 @@
       "name": "Release",
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "PROJ_ENABLE_LTO": "ON"
       }
     },
     {
       "name": "RelWithDebInfo",
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "PROJ_ENABLE_LTO": "ON"
       }
     },
     {

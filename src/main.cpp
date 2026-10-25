@@ -1,8 +1,9 @@
 /**
  * @file main.cpp
  * @author Hugo Fernández Solís (hugofernandezsolis@gmail.com)
+ * @date 24/10/2026
  *
- * @brief Hello world that also uses a Dummy object.
+ * @brief Hello world
  *
  * @copyright Copyright (c) 2025
  */
@@ -13,11 +14,9 @@
 #include <iostream>
 // External includes
 // Project includes
-#include <Dummy.h>
 
 
-int main(void) {
-  ics::Dummy dummy;
+int main() {
   std::cout << "Hello, world!" << '\n';
   return 0;
 }

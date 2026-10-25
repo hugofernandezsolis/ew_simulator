@@ -10,7 +10,15 @@ AccessModifierOffset: -2
 NamespaceIndentation: None
 MaxEmptyLinesToKeep: 2
 AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: WithoutElse
 PointerAlignment: Left
-SortIncludes: false
-ReflowComments: false
+# NL.26: el calificador const a la izquierda del tipo (`const T&`). Aviso de la documentación de clang-format: con un
+# valor distinto de Leave reescribe código sin información semántica completa y podría generar código incorrecto, así
+# que los cambios que haga esta opción se revisan en el diff antes de aceptarlos.
+QualifierAlignment: Left
+SortIncludes:
+  Enabled: true
+  IgnoreCase: false
+InsertNewlineAtEOF: true
+ReflowComments: Never
 ...

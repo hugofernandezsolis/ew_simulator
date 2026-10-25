@@ -69,16 +69,18 @@ endif()
 ########################################################################################################################
 #########                                            BUILD OPTIONS                                             #########
 ########################################################################################################################
-### Switches that change what is built. The presets set them (Debug enables sanitizers, Coverage enables coverage) and
-### they can be overridden from the command line, for example: cmake --preset Debug -DPROJ_ENABLE_SANITIZERS=OFF
+### Switches that change what is built. The presets set them (Debug enables sanitizers, Coverage enables coverage,
+### Release and RelWithDebInfo enable LTO) and they can be overridden from the command line, for example:
+### cmake --preset Debug -DPROJ_ENABLE_SANITIZERS=OFF
 ### Sanitizers and coverage live in separate presets: UBSan adds checks (e.g. that every bool read is 0 or 1) that gcov
 ### counts as branches no test can take, so mixing them lowers the branch coverage with noise.
 ### They all default to OFF. The switch for the tests, PROJ_ENABLE_TESTS, is defined in TEST SETTINGS.
 ########################################################################################################################
 
-option(PROJ_ENABLE_SANITIZERS  "Activar sanitizers (ASan/UBSan)" OFF)
-option(PROJ_ENABLE_COVERAGE    "Activar cobertura de código"     OFF)
-option(PROJ_WARNINGS_AS_ERRORS "Tratar warnings como errores"    OFF)
+option(PROJ_ENABLE_SANITIZERS  "Activar sanitizers (ASan/UBSan)"      OFF)
+option(PROJ_ENABLE_COVERAGE    "Activar cobertura de código"          OFF)
+option(PROJ_ENABLE_LTO         "Activar optimización en enlace (LTO)" OFF)
+option(PROJ_WARNINGS_AS_ERRORS "Tratar warnings como errores"         OFF)
 
 
 ########################################################################################################################
@@ -106,6 +108,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include("${CMAKE_CURRENT_LIST_DIR}/.cmake/CompilerFlags.cmake")   # proj_configure_target
 include("${CMAKE_CURRENT_LIST_DIR}/.cmake/Sanitizers.cmake")      # proj_enable_sanitizers
 include("${CMAKE_CURRENT_LIST_DIR}/.cmake/Coverage.cmake")        # proj_enable_coverage, proj_add_coverage_target
+include("${CMAKE_CURRENT_LIST_DIR}/.cmake/Lto.cmake")             # proj_enable_lto
 include("${CMAKE_CURRENT_LIST_DIR}/.cmake/External.cmake")        # proj_fetch_external, proj_setup_googletest
 include("${CMAKE_CURRENT_LIST_DIR}/.cmake/BuildComponent.cmake")  # proj_build_library
 include("${CMAKE_CURRENT_LIST_DIR}/.cmake/Tests.cmake")           # proj_add_component_tests
