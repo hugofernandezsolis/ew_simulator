@@ -20,7 +20,14 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "PROJ_ENABLE_SANITIZERS": "ON",
+        "PROJ_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "Coverage",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
         "PROJ_ENABLE_COVERAGE": "ON"
       }
     },
@@ -50,6 +57,10 @@
       "inherits": ["Debug", "ci"]
     },
     {
+      "name": "ci-Coverage",
+      "inherits": ["Coverage", "ci"]
+    },
+    {
       "name": "ci-Release",
       "inherits": ["Release", "ci"]
     },
@@ -64,6 +75,10 @@
       "configurePreset": "Debug"
     },
     {
+      "name": "Coverage",
+      "configurePreset": "Coverage"
+    },
+    {
       "name": "Release",
       "configurePreset": "Release"
     },
@@ -74,6 +89,10 @@
     {
       "name": "ci-Debug",
       "configurePreset": "ci-Debug"
+    },
+    {
+      "name": "ci-Coverage",
+      "configurePreset": "ci-Coverage"
     },
     {
       "name": "ci-Release",
@@ -90,12 +109,20 @@
       "hidden": true,
       "output": {
         "outputOnFailure": true
+      },
+      "environment": {
+        "GTEST_COLOR": "1"
       }
     },
     {
       "name": "Debug",
       "inherits": "test-base",
       "configurePreset": "Debug"
+    },
+    {
+      "name": "Coverage",
+      "inherits": "test-base",
+      "configurePreset": "Coverage"
     },
     {
       "name": "Release",
@@ -111,6 +138,11 @@
       "name": "ci-Debug",
       "inherits": "test-base",
       "configurePreset": "ci-Debug"
+    },
+    {
+      "name": "ci-Coverage",
+      "inherits": "test-base",
+      "configurePreset": "ci-Coverage"
     },
     {
       "name": "ci-Release",

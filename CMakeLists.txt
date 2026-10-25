@@ -36,16 +36,46 @@ proj_set_default_build_type()
 
 
 ########################################################################################################################
-#########                                            BUILD OPTIONS                                             #########
+#########                                            TEST SETTINGS                                             #########
 ########################################################################################################################
-### Switches that change what is built. The presets set them (Debug enables sanitizers and coverage) and they can be
-### overridden from the command line, for example: cmake --preset Debug -DPROJ_ENABLE_SANITIZERS=OFF
-### PROJ_ENABLE_TESTS defaults to PROJECT_IS_TOP_LEVEL: ON when this is the main project, OFF when it is consumed with
-### add_subdirectory() or FetchContent, so a consumer does not build (nor download GoogleTest for) our tests unless it
-### asks for them. The other options already default to OFF.
+### As the main project, include(CTest) enables testing and writes DartConfiguration.tcl to the build tree. ctest needs
+### that file in dashboard mode (ctest -T test), which IDEs such as VS Code CMake Tools use to read the results. It also
+### defines BUILD_TESTING, the standard switch that packagers (Debian, vcpkg, Conan...) set to OFF to skip the tests.
+### The CDash targets it would add (Experimental, Nightly, Continuous...) are not used, so they are skipped by marking
+### them as already added. As a subproject CTest is not included: it would set itself up in the consumer's build tree.
+###
+### PROJ_ENABLE_TESTS builds our tests. It defaults to PROJECT_IS_TOP_LEVEL: ON when this is the main project, OFF when
+### it is consumed with add_subdirectory() or FetchContent, so a consumer does not build (nor download GoogleTest for)
+### our tests unless it asks for them. It is forced OFF while BUILD_TESTING is OFF (or undefined, in a consumer without
+### CTest), so -DBUILD_TESTING=OFF turns every test off. enable_testing() has to be called in this directory before
+### any test is registered. As the main project it is always called, so ctest also runs (with 0 tests) when the tests
+### are off. As a subproject it is only called when the consumer turned our tests on (the consumer still needs its own
+### enable_testing() to run them from its ctest).
 ########################################################################################################################
 
-option(PROJ_ENABLE_TESTS       "Compilar los tests"              ${PROJECT_IS_TOP_LEVEL})
+if(PROJECT_IS_TOP_LEVEL)
+  set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)  # Skip the CDash dashboard targets
+  include(CTest)
+endif()
+
+include(CMakeDependentOption)
+cmake_dependent_option(PROJ_ENABLE_TESTS "Compilar los tests" ${PROJECT_IS_TOP_LEVEL} "BUILD_TESTING" OFF)
+
+if(PROJECT_IS_TOP_LEVEL OR PROJ_ENABLE_TESTS)
+  enable_testing()
+endif()
+
+
+########################################################################################################################
+#########                                            BUILD OPTIONS                                             #########
+########################################################################################################################
+### Switches that change what is built. The presets set them (Debug enables sanitizers, Coverage enables coverage) and
+### they can be overridden from the command line, for example: cmake --preset Debug -DPROJ_ENABLE_SANITIZERS=OFF
+### Sanitizers and coverage live in separate presets: UBSan adds checks (e.g. that every bool read is 0 or 1) that gcov
+### counts as branches no test can take, so mixing them lowers the branch coverage with noise.
+### They all default to OFF. The switch for the tests, PROJ_ENABLE_TESTS, is defined in TEST SETTINGS.
+########################################################################################################################
+
 option(PROJ_ENABLE_SANITIZERS  "Activar sanitizers (ASan/UBSan)" OFF)
 option(PROJ_ENABLE_COVERAGE    "Activar cobertura de código"     OFF)
 option(PROJ_WARNINGS_AS_ERRORS "Tratar warnings como errores"    OFF)
@@ -61,20 +91,6 @@ option(PROJ_WARNINGS_AS_ERRORS "Tratar warnings como errores"    OFF)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
-########################################################################################################################
-#########                                            TEST SETTINGS                                             #########
-########################################################################################################################
-### Enables CTest. It has to be called in this directory before any test is registered. As the main project it is
-### always called, so ctest also runs (with 0 tests) when PROJ_ENABLE_TESTS=OFF. As a subproject it is only called when
-### the consumer turned our tests on: otherwise there is nothing to register and it would only add CTest files to a
-### build tree that is not ours. (The consumer still needs its own enable_testing() to run our tests from its ctest.)
-########################################################################################################################
-
-if(PROJECT_IS_TOP_LEVEL OR PROJ_ENABLE_TESTS)
-  enable_testing()
-endif()
 
 
 ########################################################################################################################
