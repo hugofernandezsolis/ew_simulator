@@ -36,17 +36,17 @@ jobs:
           key: coverage
 
       - name: Configurar
-        run: cmake --preset ci-Debug
+        run: cmake --preset ci-Coverage
 
       # The coverage target builds the tests, runs them with ctest and writes the gcovr report.
       - name: Tests e informe de cobertura
-        run: cmake --build --preset ci-Debug --target coverage
+        run: cmake --build --preset ci-Coverage --target coverage
 
       - name: Subir informe
         uses: actions/upload-artifact@v4
         with:
           name: cobertura
-          path: .build/ci-Debug/coverage
+          path: .build/ci-Coverage/coverage
           if-no-files-found: error
           # .build/ empieza por punto: sin esto, upload-artifact (≥ v4.4) lo trata como oculto y no sube nada
           include-hidden-files: true

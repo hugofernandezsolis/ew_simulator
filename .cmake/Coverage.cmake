@@ -38,7 +38,9 @@ endfunction()
 ### <build>/coverage/index.html. The deletion is a small script generated here and run with cmake -P, so it works on
 ### every platform (gcovr --delete only deletes the files after reading them, it does not clean stale ones first).
 ### The report only counts the code under src/: tests, src/main.cpp (no unit test runs it, and it would only show up if
-### the executable happened to be built) and the build directory (GoogleTest, generated files) are left out. With Clang
+### the executable happened to be built) and the build directory (GoogleTest, generated files) are left out. The branch
+### coverage ignores the exception paths the compiler adds to every call that may throw (--exclude-throw-branches): they
+### are not decisions of our code and no reasonable test can take them, so they only lowered the percentage. With Clang
 ### the .gcda files are read with "llvm-cov gcov" instead of GCC's gcov. Without gcovr, the target only prints a notice
 ### and succeeds, so it never breaks a build.
 ########################################################################################################################
@@ -88,6 +90,7 @@ endif()
             --exclude "${PROJECT_SOURCE_DIR}/src/main\\.cpp"
             --exclude "${PROJECT_BINARY_DIR}/"
             ${gcov_args}
+            --exclude-throw-branches
             --print-summary
             --html-details "${PROJECT_BINARY_DIR}/coverage/index.html"
             "${PROJECT_BINARY_DIR}"
